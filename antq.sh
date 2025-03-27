@@ -412,7 +412,7 @@ do
                 counterDuplicate+="| $name | $version | $latestVersion | [🔗 Changelog]($changesUrl) | $securityUpdate |"
             fi
             if [[ $INPUT_AUTO_PULL_REQUEST == true ]] && [[ ! "$INPUT_IGNORE_DEPENDENCY" == *"$name"* ]]; then
-                if [[ "$INPUT_ALLOW_DEPENDENCY" == *"$name"* ]] && [[ -n "$INPUT_ALLOW_DEPENDENCY" ]]; then
+                if [[ "$INPUT_ALLOW_DEPENDENCY" == *"$name"* ]] || [[ -z "$INPUT_ALLOW_DEPENDENCY" ]]; then
                     if [[ "$INPUT_VERBOSE" == true ]]; then
                         echo "Running vulnerability_fix_pr()"
                     fi
