@@ -1,6 +1,6 @@
 #!/bin/bash
 
-update_package () {
+update_package() {
     if [[ $3 == "project.clj" ]]; then
         clojure -Sdeps '{:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}}' -M -m antq.core --upgrade --force --directory "$1" --focus="$2" --skip=clojure-cli
     else
@@ -25,6 +25,27 @@ version_ge() {
 }
 version_gt() { 
     test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; 
+}
+version_lt() { 
+    test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" == "$1"; 
+}
+
+# Define the function to close outdated PRs when a new update is available
+close_outdated_pr() {
+    existingPrs=$(gh pr list --state open --json title,number | jq -c '.[]')
+    for pr in $existingPrs; do
+        prTitle=$(echo "$pr" | jq -r '.title')
+        prNumber=$(echo "$pr" | jq -r '.number')
+        if [[ "$prTitle" == *"Bump $1 from"* ]] && [[ "$prTitle" == *"$2"* ]]; then
+            outdatedVersion=$(echo "$prTitle" | awk '{print $6}')
+            if [[ "$outdatedVersion" != "" ]] && version_lt "$outdatedVersion" "$3"; then
+                if [[ "$INPUT_VERBOSE" == true ]]; then
+                    echo "Closing outdated PR #$prNumber: $prTitle"
+                fi
+                gh pr close "$prNumber" --comment "Closing this PR as a newer update to version $3 is available."
+            fi
+        fi
+    done
 }
 
 high_critical_check_security_fix () {
@@ -436,6 +457,7 @@ do
                                     if [[ "$INPUT_VERBOSE" == true ]]; then
                                         echo "Create the security PR dependabot/clojure${cljdir/$GITHUB_WORKSPACE}/$escapedName-$latestVersion-$1-$time"
                                     fi
+                                    close_outdated_pr "$name" "$version" "$latestVersion"
                                     update_package "$cljdir" "$name" "$1" "$escapedName" "$latestVersion" "$time" "$version" "$changesUrl" "$securityUpdatesPrBody"
                                 else
                                     git checkout "$INPUT_MAIN_BRANCH"
@@ -444,6 +466,7 @@ do
                                 if [[ "$INPUT_VERBOSE" == true ]]; then
                                     echo "Create the security PR dependabot/clojure${cljdir/$GITHUB_WORKSPACE}/$escapedName-$latestVersion-$1-$time"
                                 fi
+                                close_outdated_pr "$name" "$version" "$latestVersion"
                                 update_package "$cljdir" "$name" "$1" "$escapedName" "$latestVersion" "$time" "$version" "$changesUrl" "$securityUpdatesPrBody"
                             fi    
                         fi
@@ -465,6 +488,7 @@ do
                                 if [[ "$INPUT_VERBOSE" == true ]]; then
                                     echo "Create the security PR dependabot/clojure${cljdir/$GITHUB_WORKSPACE}/$escapedName-$latestVersion-$1-$time"
                                 fi
+                                close_outdated_pr "$name" "$version" "$latestVersion"
                                 update_package "$cljdir" "$name" "$1" "$escapedName" "$latestVersion" "$time" "$version" "$changesUrl" "$securityUpdatesPrBody"
                             else
                                 git checkout "$INPUT_MAIN_BRANCH"
@@ -473,6 +497,7 @@ do
                             if [[ "$INPUT_VERBOSE" == true ]]; then
                                 echo "Create the security PR dependabot/clojure${cljdir/$GITHUB_WORKSPACE}/$escapedName-$latestVersion-$1-$time"
                             fi
+                            close_outdated_pr "$name" "$version" "$latestVersion"
                             update_package "$cljdir" "$name" "$1" "$escapedName" "$latestVersion" "$time" "$version" "$changesUrl" "$securityUpdatesPrBody"
                         fi
                     fi
