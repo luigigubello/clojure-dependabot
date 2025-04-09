@@ -35,6 +35,7 @@ close_outdated_pr() {
     existingPrs=$(gh pr list --state open --json title,number | jq -c '.[]')
     echo "existing PRs: ${existingPrs}"
     for pr in $existingPrs; do
+        echo "$pr"
         prTitle=$(echo "$pr" | jq -r '.title')
         echo "Title: ${prTitle}"
         echo "Bump $1 from"
