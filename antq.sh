@@ -33,11 +33,17 @@ version_lt() {
 # Define the function to close outdated PRs when a new update is available
 close_outdated_pr() {
     existingPrs=$(gh pr list --state open --json title,number | jq -c '.[]')
+    echo "existing PRs: ${existingPrs}"
     for pr in $existingPrs; do
         prTitle=$(echo "$pr" | jq -r '.title')
+        echo "Title: ${prTitle}"
+        echo "Bump $1 from"
+        echo "$2"
         prNumber=$(echo "$pr" | jq -r '.number')
+        echo "Number: ${prNumber}"
         if [[ "$prTitle" == *"Bump $1 from"* ]] && [[ "$prTitle" == *"$2"* ]]; then
             outdatedVersion=$(echo "$prTitle" | awk '{print $6}')
+            echo "outdatedVersion: ${outdatedVersion}"
             if [[ "$outdatedVersion" != "" ]] && version_lt "$outdatedVersion" "$3"; then
                 if [[ "$INPUT_VERBOSE" == true ]]; then
                     echo "Closing outdated PR #$prNumber: $prTitle"
