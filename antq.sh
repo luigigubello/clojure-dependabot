@@ -34,12 +34,12 @@ version_lt() {
 close_outdated_pr() {
     existingPrs=$(gh pr list --state open --json title,number | jq -c '.[]')
     echo "existing PRs: ${existingPrs}"
-    for pr in $existingPrs; do
+    
+    # Use process substitution to pass the JSON objects directly to the while loop
+    while IFS= read -r pr; do
         echo "$pr"
         prTitle=$(echo "$pr" | jq -r '.title')
         echo "Title: ${prTitle}"
-        echo "Bump $1 from"
-        echo "$2"
         prNumber=$(echo "$pr" | jq -r '.number')
         echo "Number: ${prNumber}"
         if [[ "$prTitle" == *"Bump $1 from"* ]] && [[ "$prTitle" == *"$2"* ]]; then
@@ -52,7 +52,7 @@ close_outdated_pr() {
                 gh pr close "$prNumber" --comment "Closing this PR as a newer update to version $3 is available."
             fi
         fi
-    done
+    done < <(echo "$existingPrs")
 }
 
 high_critical_check_security_fix () {
