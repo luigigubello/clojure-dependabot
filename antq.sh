@@ -301,7 +301,7 @@ if [[ "$INPUT_VERBOSE" == true ]]; then
         echo "Finding all $1 files"
 fi
 mapfile -t array < <(find . -name "$1")
-if [[ $1 == "project.clj" ]]; then
+if [[ $1 == "project.clj" ]] && [[ "$INPUT_SUMMARY" == true ]]; then
     echo "## Outdated Dependencies" >> "$GITHUB_STEP_SUMMARY"
 fi
 if [[ $INPUT_INCLUDE_SUBDIRECTORIES != true ]]; then
@@ -426,7 +426,7 @@ do
             if [[ "$INPUT_VERBOSE" == true ]]; then
                 echo "Adding info to GitHub Summary"
             fi            
-            if [[ $counterDuplicate != *"| $name | $version | $latestVersion | [🔗 Changelog]($changesUrl) | $securityUpdate |"* ]]; then
+            if [[ $counterDuplicate != *"| $name | $version | $latestVersion | [🔗 Changelog]($changesUrl) | $securityUpdate |"* ]] && [[ "$INPUT_SUMMARY" == true ]]; then
                 if [[ $changesUrl == "null" ]]; then
                     echo "| $name | $version | $latestVersion |  | $securityUpdate |" >> "$GITHUB_STEP_SUMMARY"
                     if [[ "$INPUT_VERBOSE" == true ]]; then
