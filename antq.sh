@@ -326,6 +326,7 @@ do
     if [[ "$INPUT_VERBOSE" == true ]]; then
         echo "Creating antq-report.json"
     fi
+    clojure -Sdeps '{:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}}' -P
     clojure -Sdeps '{:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}}' -M -m antq.core --reporter="json" > /tmp/antq-report.json || true
     length=$(jq '. | length' /tmp/antq-report.json)
     length=$((length-1))
