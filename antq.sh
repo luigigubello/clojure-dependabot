@@ -413,7 +413,7 @@ do
                 securityUpdate="⬆️"
             fi
             prefix="dependabot/clojure${cljdir/$GITHUB_WORKSPACE}/$escapedName-$latestVersion-$1-"
-            if [[ "$summaryOutput" -eq 0 ]]; then
+            if [[ "$summaryOutput" -eq 0 ]] && [[ "$INPUT_SUMMARY" == true ]]; then
                 {
                     echo "### $INPUT_DIRECTORY$i"
                     echo "<details>"
@@ -513,7 +513,7 @@ do
             fi
         fi
     done
-    if [[ "$summaryOutput" -eq 1 ]]; then
+    if [[ "$summaryOutput" -eq 1 ]] && [[ "$INPUT_SUMMARY" == true ]]; then
         echo "</details>" >> "$GITHUB_STEP_SUMMARY"
         echo "" >> "$GITHUB_STEP_SUMMARY"
     fi
