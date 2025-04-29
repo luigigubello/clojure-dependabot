@@ -21,12 +21,14 @@ if [[ "$INPUT_VERBOSE" == true ]]; then
 fi
 chmod +x /dependabot_alerts.sh
 /dependabot_alerts.sh
-if [[ "$INPUT_VERBOSE" == true ]]; then
+if [[ "$INPUT_VERBOSE" == true ]] && [[ "$INPUT_SUMMARY" == true ]]; then
     echo "Running alerts_summary.sh"
 fi
 chmod +x /alerts_summary.sh
-/alerts_summary.sh project.clj
-/alerts_summary.sh deps.edn
+if [[ "$INPUT_SUMMARY" == true ]]; then
+    /alerts_summary.sh project.clj
+    /alerts_summary.sh deps.edn
+fi
 if [[ "$INPUT_VERBOSE" == true ]]; then
     echo "Running antq.sh"
 fi
