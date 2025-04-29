@@ -33,3 +33,5 @@ fi
 chmod +x /antq.sh
 /antq.sh project.clj
 /antq.sh deps.edn
+git checkout "$INPUT_MAIN_BRANCH"
+git restore .
